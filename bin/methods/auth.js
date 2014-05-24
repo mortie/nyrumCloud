@@ -9,19 +9,10 @@ function genToken(callback) {
 module.exports = function(params, context) {
 	genToken(function(token) {
 
-		//make sure the history doesn't get too long
-		if (context.auth.length > context.conf.authHistoryLength) {
-			context.auth.splice(
-				context.conf.authHistoryLength,
-				context.auth.length - context.conf.authHistoryLength
-			);
-		}
-
 		//save data about the request
-		params.context.auth[token] = {
-			"ip": params.request.connection.remoteAddress,
-			"agent": params.request.headers['user-agent'],
-		}
+		if (!context.authTokens[params.post.username])
+			context.authTokens[params.post.username] = [];
+		context.authTokens[params.post.username].push(token);
 
 		//respond with the token
 		params.response.write(JSON.stringify({

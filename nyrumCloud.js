@@ -4,16 +4,15 @@ var http = require("http");
 var fs = require("fs");
 
 var methods = require("./bin/methods");
-var tokenAuth = require("./bin/tokenAuth");
 
 //set up project-wide context variable
 var context = {
-	"conf": JSON.parse(fs.readSync("conf.js")),
+	"conf": JSON.parse(fs.readFileSync("./conf.json")),
 	"authTokens": {}
 }
 
 //handle incoming requestts
-var httpServer = http.createServer(function(request, response) {
+http.createServer(function(request, response) {
 
 	//get POST data
 	var postBody = '';
@@ -26,14 +25,34 @@ var httpServer = http.createServer(function(request, response) {
 
 	//auth and handle request
 	request.on('end', function() {
-		if (tokenAuth(request)) {
-			var url = request.url.split("/").slice(1);
-			methods[url[0]]({
+
+		//prepare variables
+		var post = JSON.parse(postBody);
+		var url = request.url.split("/").slice(1);
+		if (url)
+			var method = methods[url[0]];
+
+		//if method exists, and authenticated (or method doesn't require authentication),
+		//run the method
+		if (method && (method.disableAuth || tokenAuth(post) !== false)) {
+			method({
 				"url": url,
 				"request": request,
 				"response": response,
-				"post": postBody
+				"post": post
 			}, context);
 		}
 	});
-}).listen(conf.port);
+}).listen(context.conf.port);
+
+//authenticate based on token
+function  tokenAuth(post) {
+	if (context.authTokens[post.username]
+	&&  context.authTokens[post.username].indexOf(post.token) !== -1) {
+		console.log("authorized "+post.username);
+		return true;
+	} else {
+		console.log("not authorized "+post.username);
+		return false;
+	}
+}
