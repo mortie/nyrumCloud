@@ -1,0 +1,11 @@
+{
+	"mysql": {
+		"host": "localhost",
+		"user": "root",
+		"password": "",
+		"database": "jsSiteBuilder"
+	},
+	"port": 1337,
+	"authHistoryLength": 20,
+	"maxPostBodyLength": 1000000000
+}
