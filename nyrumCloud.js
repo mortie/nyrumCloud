@@ -41,6 +41,11 @@ http.createServer(function(request, response) {
 				"response": response,
 				"post": post
 			}, context);
+		} else {
+			response.write(JSON.stringify({
+				"err": 1
+			}));
+			response.end();
 		}
 	});
 }).listen(context.conf.port);
@@ -49,10 +54,10 @@ http.createServer(function(request, response) {
 function  tokenAuth(post) {
 	if (context.authTokens[post.username]
 	&&  context.authTokens[post.username].indexOf(post.token) !== -1) {
-		console.log("authorized "+post.username);
+		console.log(post.username+" authorized");
 		return true;
 	} else {
-		console.log("not authorized "+post.username);
+		console.log(post.username+" not authorized");
 		return false;
 	}
 }
