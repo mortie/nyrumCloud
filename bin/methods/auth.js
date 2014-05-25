@@ -1,15 +1,20 @@
 var crypto = require("crypto");
 var mysql = require("mysql");
 
-module.exports = function(params, context) {
+module.exports = function(params, context)
+{
 
 	//query database to get the user
-	var sql = mysql.format("SELECT passwordHash,passwordSalt,id FROM user WHERE username=?", [params.post.username]);
-	context.mysqlConn.query(sql, function(err, result) {
+	var sql = mysql.format("SELECT passwordHash,passwordSalt,id FROM user WHERE username=?", [
+			params.post.username
+	]);
+	context.mysqlConn.query(sql, function(err, result)
+	{
 		if (err) throw err;
 
 		//if a user with that username exists and the password matches, create an auth token
-		if (result.length > 0) {
+		if (result.length > 0)
+		{
 
 			var user = result[0];
 
@@ -19,7 +24,8 @@ module.exports = function(params, context) {
 			    .digest("hex");
 
 			//if correct password
-			if (receivedPassHash === user.passwordHash) {
+			if (receivedPassHash === user.passwordHash)
+			{
 
 				//generate token
 				var token = crypto.randomBytes(64).toString("hex");
@@ -34,7 +40,9 @@ module.exports = function(params, context) {
 				params.response.end();
 
 			//if username or password is wrong, respond with error code 2
-			} else {
+			}
+			else
+			{
 				params.response.write(JSON.stringify({
 					"err": 2
 				}));
@@ -42,7 +50,9 @@ module.exports = function(params, context) {
 			}
 
 		//if no user exists, respond with error code 2
-		} else {
+		}
+		else
+		{
 			params.response.write(JSON.stringify({
 				"err": 2
 			}));

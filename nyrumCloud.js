@@ -15,7 +15,8 @@ var context = {
 }
 
 async.series({
-	"mysqlConnect": function(next) {
+	"mysqlConnect": function(next)
+	{
 		context.mysqlConn = mysql.createConnection({
 			"host": context.conf.mysql.host,
 			"user": context.conf.mysql.user,
@@ -23,33 +24,42 @@ async.series({
 			"multipleStatements": true
 		});
 
-		context.mysqlConn.connect(function(err) {
+		context.mysqlConn.connect(function(err)
+		{
 			if (err) throw err;
 
 			next();
 		});
 	},
 
-	"setupSql": function(next) {
-		fs.readFile("setup.sql", "utf8", function(err, data) {
+	"setupSql": function(next)
+	{
+		fs.readFile("setup.sql", "utf8", function(err, data)
+		{
 			if (err) throw err;
 
 			//run the standard setup query
 			var query = data.replace(/\{db\}/g, context.conf.mysql.database);
-			context.mysqlConn.query(query, function(err, result) {
+			context.mysqlConn.query(query, function(err, result)
+			{
 				if (err) throw err;
 
 				//if no users exist, create a root user
-				context.mysqlConn.query("SELECT id FROM user", function(err, result) {
+				context.mysqlConn.query("SELECT id FROM user", function(err, result)
+				{
 					if (err) throw err;
 
-					if (result.length > 0) {
+					if (result.length > 0)
+					{
 						next();
-					} else {
+					}
+					else
+					{
 						console.log("No users. Creating root user...");
 
 						//generate salt and hash
-						try {
+						try
+						{
 							//create random salt
 							var salt = crypto.randomBytes(64).toString("hex");
 
@@ -57,7 +67,9 @@ async.series({
 							var hash = crypto.createHash("sha512")
 							    .update(salt+context.conf.root.password)
 							    .digest("hex");
-						} catch (err) {
+						}
+						catch (err)
+						{
 							throw err;
 						};
 
@@ -68,7 +80,8 @@ async.series({
 							salt,
 							true
 						]);
-						context.mysqlConn.query(sql, function(err, result) {
+						context.mysqlConn.query(sql, function(err, result)
+						{
 							if (err) throw err;
 
 							console.log("Root user created.");
@@ -80,20 +93,25 @@ async.series({
 		});
 	},
 
-	"handleRequests": function(next) {
-		http.createServer(function(request, response) {
+	"handleRequests": function(next)
+	{
+		http.createServer(function(request, response)
+		{
 
 			//get POST data
 			var postBody = '';
-			request.on('data', function(data) {
+			request.on('data', function(data)
+			{
 				postBody += data;
-				if (postBody.length > context.conf.maxPostLength) {
+				if (postBody.length > context.conf.maxPostLength)
+				{
 					request.connection.destroy();
 				}
 			});
 
 			//auth and handle request
-			request.on('end', function() {
+			request.on('end', function()
+			{
 
 				//prepare variables
 				var post = JSON.parse(postBody);
@@ -104,14 +122,17 @@ async.series({
 				//if method exists, and authenticated (or method doesn't require authentication),
 				//run the method
 				console.log("running "+url[0]);
-				if (method && (method.disableAuth || tokenAuth(post, context) !== false)) {
+				if (method && (method.disableAuth || tokenAuth(post, context) !== false))
+				{
 					method({
 						"url": url,
 						"request": request,
 						"response": response,
 						"post": post
 					}, context);
-				} else {
+				}
+				else
+				{
 					response.write(JSON.stringify({
 						"err": 1
 					}));

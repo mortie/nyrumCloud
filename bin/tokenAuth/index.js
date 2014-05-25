@@ -1,3 +1,4 @@
-module.exports = function (post, context) {
+module.exports = function (post, context)
+{
 	return context.authTokens[post.token];
 }
