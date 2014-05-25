@@ -36,64 +36,70 @@ function mysqlConnect()
 
 function setupSql()
 {
-	fs.readFile("setup.sql", "utf8", function(err, data)
+
+	//get the setup query from setup.sql
+	try
+	{
+		var data = fs.readFileSync("setup.sql", "utf8");
+	}
+	catch (err)
+	{
+		throw err;
+	}
+
+	//run the standard setup query
+	var query = data.replace(/\{db\}/g, context.conf.mysql.database);
+	context.mysqlConn.query(query, function(err, result)
 	{
 		if (err) throw err;
 
-		//run the standard setup query
-		var query = data.replace(/\{db\}/g, context.conf.mysql.database);
-		context.mysqlConn.query(query, function(err, result)
+		//if no users exist, create a root user
+		context.mysqlConn.query("SELECT id FROM user", function(err, result)
 		{
 			if (err) throw err;
 
-			//if no users exist, create a root user
-			context.mysqlConn.query("SELECT id FROM user", function(err, result)
+			//if users exists
+			if (!result.length)
 			{
-				if (err) throw err;
+				console.log("No users. Creating root user...");
 
-				//if users exists
-				if (!result.length)
+				//generate salt and hash
+				try
 				{
-					console.log("No users. Creating root user...");
+					//create random salt
+					var salt = crypto.randomBytes(64).toString("hex");
 
-					//generate salt and hash
-					try
-					{
-						//create random salt
-						var salt = crypto.randomBytes(64).toString("hex");
+					//create hash
+					var hash = crypto.createHash("sha512")
+					          .update(salt+context.conf.root.password)
+					          .digest("hex");
+				}
+				catch (err)
+				{
+					throw err;
+				}
 
-						//create hash
-						var hash = crypto.createHash("sha512")
-						           .update(salt+context.conf.root.password)
-						           .digest("hex");
-					}
-					catch (err)
-					{
-						throw err;
-					};
+				//create new user
+				var sql = mysql.format("INSERT INTO user (username, passwordHash, passwordSalt, isAdmin) VALUES (?, ?, ?, ?)",
+				[
+					context.conf.root.username,
+					hash,
+					salt,
+					true
+				]);
+				context.mysqlConn.query(sql, function(err, result)
+				{
+					if (err) throw err;
 
-					//create new user
-					var sql = mysql.format("INSERT INTO user (username, passwordHash, passwordSalt, isAdmin) VALUES (?, ?, ?, ?)",
-					[
-						context.conf.root.username,
-						hash,
-						salt,
-						true
-					]);
-					context.mysqlConn.query(sql, function(err, result)
-					{
-						if (err) throw err;
+					console.log("Root user created.");
 
-						console.log("Root user created.");
+					//move on to handle requests
+					handleRequests();
+				});
+			} 
 
-						//move on to handle requests
-						handleRequest();
-					});
-				} 
-
-				//if users exist, just move on to handle rquestes
-				else handleRequests();
-			});
+			//if users exist, just move on to handle rquestes
+			else handleRequests();
 		});
 	});
 }
