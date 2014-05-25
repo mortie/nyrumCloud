@@ -2,143 +2,149 @@
 var http      = require("http");
 var fs        = require("fs");
 var mysql     = require("mysql");
-var async     = require("async");
 var crypto    = require("crypto");
 
 var methods   = require("./bin/methods");
 var tokenAuth = require("./bin/tokenAuth");
 
 //set up project-wide context variable
-var context = {
+var context =
+{
 	"conf": JSON.parse(fs.readFileSync("./conf.json")),
 	"authTokens": {}
 }
 
-async.series({
-	"mysqlConnect": function(next)
-	{
-		context.mysqlConn = mysql.createConnection({
-			"host": context.conf.mysql.host,
-			"user": context.conf.mysql.user,
-			"password": context.conf.mysql.password,
-			"multipleStatements": true
-		});
+mysqlConnect();
 
-		context.mysqlConn.connect(function(err)
+function mysqlConnect()
+{
+	context.mysqlConn = mysql.createConnection(
+	{
+		"host": context.conf.mysql.host,
+		"user": context.conf.mysql.user,
+		"password": context.conf.mysql.password,
+		"multipleStatements": true
+	});
+
+	context.mysqlConn.connect(function(err)
+	{
+		if (err) throw err;
+
+		setupSql();
+	});
+}
+
+function setupSql()
+{
+	fs.readFile("setup.sql", "utf8", function(err, data)
+	{
+		if (err) throw err;
+
+		//run the standard setup query
+		var query = data.replace(/\{db\}/g, context.conf.mysql.database);
+		context.mysqlConn.query(query, function(err, result)
 		{
 			if (err) throw err;
 
-			next();
-		});
-	},
-
-	"setupSql": function(next)
-	{
-		fs.readFile("setup.sql", "utf8", function(err, data)
-		{
-			if (err) throw err;
-
-			//run the standard setup query
-			var query = data.replace(/\{db\}/g, context.conf.mysql.database);
-			context.mysqlConn.query(query, function(err, result)
+			//if no users exist, create a root user
+			context.mysqlConn.query("SELECT id FROM user", function(err, result)
 			{
 				if (err) throw err;
 
-				//if no users exist, create a root user
-				context.mysqlConn.query("SELECT id FROM user", function(err, result)
+				//if users exists
+				if (!result.length)
 				{
-					if (err) throw err;
+					console.log("No users. Creating root user...");
 
-					if (result.length > 0)
+					//generate salt and hash
+					try
 					{
-						next();
+						//create random salt
+						var salt = crypto.randomBytes(64).toString("hex");
+
+						//create hash
+						var hash = crypto.createHash("sha512")
+						           .update(salt+context.conf.root.password)
+						           .digest("hex");
 					}
-					else
+					catch (err)
 					{
-						console.log("No users. Creating root user...");
+						throw err;
+					};
 
-						//generate salt and hash
-						try
-						{
-							//create random salt
-							var salt = crypto.randomBytes(64).toString("hex");
+					//create new user
+					var sql = mysql.format("INSERT INTO user (username, passwordHash, passwordSalt, isAdmin) VALUES (?, ?, ?, ?)",
+					[
+						context.conf.root.username,
+						hash,
+						salt,
+						true
+					]);
+					context.mysqlConn.query(sql, function(err, result)
+					{
+						if (err) throw err;
 
-							//create hash
-							var hash = crypto.createHash("sha512")
-							    .update(salt+context.conf.root.password)
-							    .digest("hex");
-						}
-						catch (err)
-						{
-							throw err;
-						};
+						console.log("Root user created.");
 
-						//create new user
-						var sql = mysql.format("INSERT INTO user (username, passwordHash, passwordSalt, isAdmin) VALUES (?, ?, ?, ?)", [
-							context.conf.root.username,
-							hash,
-							salt,
-							true
-						]);
-						context.mysqlConn.query(sql, function(err, result)
-						{
-							if (err) throw err;
+						//move on to handle requests
+						handleRequest();
+					});
+				} 
 
-							console.log("Root user created.");
-							next();
-						});
-					}
-				});
+				//if users exist, just move on to handle rquestes
+				else handleRequests();
 			});
 		});
-	},
+	});
+}
 
-	"handleRequests": function(next)
+function handleRequests()
+{
+	http.createServer(function(request, response)
 	{
-		http.createServer(function(request, response)
+
+		//get POST data
+		var postBody = '';
+		request.on('data', function(data)
+		{
+			postBody += data;
+			if (postBody.length > context.conf.maxPostLength)
+			{
+				request.connection.destroy();
+			}
+		});
+
+		//auth and handle request
+		request.on('end', function()
 		{
 
-			//get POST data
-			var postBody = '';
-			request.on('data', function(data)
+			//prepare variables
+			var post = JSON.parse(postBody);
+			var url = request.url.split("/").slice(1);
+			if (url)
+				var method = methods[url[0]];
+
+			//if method exists, and authenticated (or method doesn't require authentication),
+			//run the method
+			console.log("running "+url[0]);
+			if (method && (method.disableAuth || tokenAuth(post, context) !== false))
 			{
-				postBody += data;
-				if (postBody.length > context.conf.maxPostLength)
+				method(
 				{
-					request.connection.destroy();
-				}
-			});
-
-			//auth and handle request
-			request.on('end', function()
+					"url": url,
+					"request": request,
+					"response": response,
+					"post": post
+				}, context);
+			}
+			else
 			{
-
-				//prepare variables
-				var post = JSON.parse(postBody);
-				var url = request.url.split("/").slice(1);
-				if (url)
-					var method = methods[url[0]];
-
-				//if method exists, and authenticated (or method doesn't require authentication),
-				//run the method
-				console.log("running "+url[0]);
-				if (method && (method.disableAuth || tokenAuth(post, context) !== false))
+				response.write(JSON.stringify(
 				{
-					method({
-						"url": url,
-						"request": request,
-						"response": response,
-						"post": post
-					}, context);
-				}
-				else
-				{
-					response.write(JSON.stringify({
-						"err": 1
-					}));
-					response.end();
-				}
-			});
-		}).listen(context.conf.port);
-	}
-});
+					"err": 1
+				}));
+				response.end();
+			}
+		});
+	}).listen(context.conf.port);
+}

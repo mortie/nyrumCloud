@@ -5,7 +5,8 @@ module.exports = function(params, context)
 {
 
 	//query database to get the user
-	var sql = mysql.format("SELECT passwordHash,passwordSalt,id FROM user WHERE username=?", [
+	var sql = mysql.format("SELECT passwordHash,passwordSalt,id FROM user WHERE username=?",
+	[
 			params.post.username
 	]);
 	context.mysqlConn.query(sql, function(err, result)
@@ -20,8 +21,8 @@ module.exports = function(params, context)
 
 			//generate hash from received password
 			var receivedPassHash = crypto.createHash("sha512")
-			    .update(user.passwordSalt+params.post.password)
-			    .digest("hex");
+			                      .update(user.passwordSalt+params.post.password)
+			                      .digest("hex");
 
 			//if correct password
 			if (receivedPassHash === user.passwordHash)
@@ -34,26 +35,29 @@ module.exports = function(params, context)
 				context.authTokens[token] = user.id;
 
 				//respond with the token
-				params.response.write(JSON.stringify({
+				params.response.write(JSON.stringify(
+				{
 					"token": token
 				}));
 				params.response.end();
+			}
 
 			//if username or password is wrong, respond with error code 2
-			}
 			else
 			{
-				params.response.write(JSON.stringify({
+				params.response.write(JSON.stringify(
+				{
 					"err": 2
 				}));
 				params.response.end();
 			}
+		}
 
 		//if no user exists, respond with error code 2
-		}
 		else
 		{
-			params.response.write(JSON.stringify({
+			params.response.write(JSON.stringify(
+			{
 				"err": 2
 			}));
 			params.response.end();
