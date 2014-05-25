@@ -3,7 +3,7 @@
 		"host": "localhost",
 		"user": "root",
 		"password": "",
-		"database": "jsSiteBuilder"
+		"database": "nyrumCloud"
 	},
 	"port": 1337,
 	"authHistoryLength": 20,

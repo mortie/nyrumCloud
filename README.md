@@ -24,7 +24,7 @@ Output if credentials are valid:
 		"token": (auth token)
 	}
 
-#### **/testAuth**:
+#### **/testToken**:
 
 Input:
 
