@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-var scrypt    = require("scrypt");
 var http      = require("http");
 var fs        = require("fs");
 var mysql     = require("mysql");
 var async     = require("async");
+var crypto    = require("crypto");
 
 var methods   = require("./bin/methods");
 var tokenAuth = require("./bin/tokenAuth");
@@ -34,12 +34,48 @@ async.series({
 		fs.readFile("setup.sql", "utf8", function(err, data) {
 			if (err) throw err;
 
+			//run the standard setup query
 			var query = data.replace(/\{db\}/g, context.conf.mysql.database);
-
 			context.mysqlConn.query(query, function(err, result) {
 				if (err) throw err;
 
-				next();
+				//if no users exist, create a root user
+				context.mysqlConn.query("SELECT id FROM user", function(err, result) {
+					if (err) throw err;
+
+					if (result.length > 0) {
+						next();
+					} else {
+						console.log("No users. Creating root user...");
+
+						//generate salt and hash
+						try {
+							//create random salt
+							var salt = crypto.randomBytes(64).toString("hex");
+
+							//create hash
+							var hash = crypto.createHash("sha512")
+							    .update(salt+context.conf.root.password)
+							    .digest("hex");
+						} catch (err) {
+							throw err;
+						};
+
+						//create new user
+						var sql = mysql.format("INSERT INTO user (username, passwordHash, passwordSalt, isAdmin) VALUES (?, ?, ?, ?)", [
+							context.conf.root.username,
+							hash,
+							salt,
+							true
+						]);
+						context.mysqlConn.query(sql, function(err, result) {
+							if (err) throw err;
+
+							console.log("Root user created.");
+							next();
+						});
+					}
+				});
 			});
 		});
 	},

@@ -14,10 +14,11 @@ USE `{db}` ;
 CREATE TABLE IF NOT EXISTS `{db}`.`user` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(45) NOT NULL,
-  `passwordHash` VARCHAR(64) NOT NULL,
-  `passwordSalt` VARCHAR(64) NOT NULL,
+  `passwordHash` VARCHAR(128) NOT NULL,
+  `passwordSalt` VARCHAR(128) NOT NULL,
   `isAdmin` TINYINT(1) NOT NULL,
   `email` VARCHAR(256) NULL,
+  UNIQUE (username),
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

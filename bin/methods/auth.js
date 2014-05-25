@@ -1,32 +1,47 @@
 var crypto = require("crypto");
 var mysql = require("mysql");
 
-function genToken(callback) {
-	crypto.randomBytes(64, function(ex, buffer) {
-		callback(buffer.toString('hex'));
-	});
-}
-
 module.exports = function(params, context) {
-	var sql = mysql.format("SELECT passwordHash,passwordSalt,id FROM user WHERE username='?'", [params.post.username]);
+
+	//query database to get the user
+	var sql = mysql.format("SELECT passwordHash,passwordSalt,id FROM user WHERE username=?", [params.post.username]);
 	context.mysqlConn.query(sql, function(err, result) {
+		if (err) throw err;
 
 		//if a user with that username exists and the password matches, create an auth token
-		if (result
-		&&  scrypt.hash(result.passwordSalt+params.post.username) === result.passwordHash) {
-			genToken(function(token) {
+		if (result.length > 0) {
 
-				//save data about the request
-				context.authTokens[token] = params.post.username;
+			var user = result[0];
+
+			//generate hash from received password
+			var receivedPassHash = crypto.createHash("sha512")
+			    .update(user.passwordSalt+params.post.password)
+			    .digest("hex");
+
+			//if correct password
+			if (receivedPassHash === user.passwordHash) {
+
+				//generate token
+				var token = crypto.randomBytes(64).toString("hex");
+
+				//save token
+				context.authTokens[token] = user.id;
 
 				//respond with the token
 				params.response.write(JSON.stringify({
 					"token": token
 				}));
 				params.response.end();
-			});
 
-		//if no user exists or password is wrong, send back error code 2
+			//if username or password is wrong, respond with error code 2
+			} else {
+				params.response.write(JSON.stringify({
+					"err": 2
+				}));
+				params.response.end();
+			}
+
+		//if no user exists, respond with error code 2
 		} else {
 			params.response.write(JSON.stringify({
 				"err": 2

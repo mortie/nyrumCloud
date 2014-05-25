@@ -5,7 +5,11 @@
 		"password": "",
 		"database": "nyrumCloud"
 	},
+	"root": {
+		"username": "root",
+		"password": "root"
+	},
 	"port": 1337,
-	"authHistoryLength": 20,
-	"maxPostBodyLength": 1000000000
+	"maxPostBodyLength": 1000000000,
+	"saltLength": 64
 }
