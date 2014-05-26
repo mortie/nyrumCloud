@@ -93,18 +93,18 @@ function setupSql()
 
 					console.log("Root user created.");
 
-					//move on to handle requests
-					handleRequests();
+					//move on to create server
+					createServer();
 				});
 			} 
 
-			//if users exist, just move on to handle rquestes
-			else handleRequests();
+			//if users exist, just move on to create server 
+			else createServer();
 		});
 	});
 }
 
-function handleRequests()
+function createServer()
 {
 	http.createServer(function(request, response)
 	{
@@ -124,33 +124,77 @@ function handleRequests()
 		request.on('end', function()
 		{
 
-			//prepare variables
-			var post = JSON.parse(postBody);
-			var url = request.url.split("/").slice(1);
-			if (url)
-				var method = methods[url[0]];
-
-			//if method exists, and authenticated (or method doesn't require authentication),
-			//run the method
-			console.log("running "+url[0]);
-			if (method && (method.disableAuth || tokenAuth(post, context) !== false))
+			//if POST arguments were provided, go on to handle the request
+			if (postBody)
 			{
-				method(
+				try
 				{
-					"url": url,
-					"request": request,
-					"response": response,
-					"post": post
-				}, context);
+					var post = JSON.parse(postBody);
+					handleRequest(post, request, response);
+				}
+				catch (err) {}
 			}
+
+			//else, respond with error code 3 (insuficcient arguments)
 			else
 			{
 				response.write(JSON.stringify(
 				{
-					"err": 1
+					"err": 3
 				}));
-				response.end();
 			}
 		});
 	}).listen(context.conf.port);
+}
+
+function handleRequest(post, request, response)
+{
+	var headers = {};
+	headers["Access-Control-Allow-Origin"] = "*";
+	response.writeHead(200, headers);
+
+	var url = request.url.split("/").slice(1);
+	if (url)
+		var method = methods[url[0]];
+
+	//if method exists, and authenticated (or method doesn't require authentication),
+	//run the method
+	console.log("running "+url[0]);
+	if (method && (method.disableAuth || tokenAuth(post, context) !== false))
+	{
+
+		//check if all required arguments are present
+		var i;
+		for (i in method.postArgs)
+		{
+			if (post[method.postArgs[i]] === undefined)
+			{
+				response.write(JSON.stringify(
+				{
+					"err": 3
+				}));
+				response.end();
+				return;
+			}
+		}
+
+		//if all arguments are there, proceed to run the method
+		method(
+		{
+			"url": url,
+			"request": request,
+			"response": response,
+			"post": post
+		}, context);
+	}
+
+	//else, respond with error code 1 (invalid token)
+	else
+	{
+		response.write(JSON.stringify(
+		{
+			"err": 1
+		}));
+		response.end();
+	}
 }

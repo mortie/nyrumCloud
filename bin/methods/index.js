@@ -1,7 +1,23 @@
-exports.auth = require("./auth.js");
-exports.auth.disableAuth = true;
+var e = module.exports;
 
-exports.testToken = require("./testToken.js");
-exports.testToken.disableAuth = true;
+e.auth = require("./auth.js");
+e.auth.disableAuth = true;
+e.auth.postArgs =
+[
+	"username",
+	"password"
+]
 
-exports.admin_newUser = require("./admin_newUser.js");
+e.testToken = require("./testToken.js");
+e.testToken.disableAuth = true;
+e.testToken.postArgs =
+[
+	"token"
+]
+
+e.admin_newUser = require("./admin_newUser.js");
+[
+	"username",
+	"password",
+	"token"
+]
