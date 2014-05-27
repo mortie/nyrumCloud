@@ -146,8 +146,19 @@ function handleRequest(post, request, response)
 
 	//if method exists, and authenticated (or method doesn't require authentication),
 	//run the method
-	console.log("running "+url[0]);
-	if (method && (method.disableAuth || context.authTokens[post.token]))
+
+	//no such method exists, return error code 5
+	if (!method)
+	{
+		response.write(JSON.stringify(
+		{
+			"err": 5
+		}));
+		response.end();
+	}
+
+	//method exists, and user is authenticated, all is good
+	else if (method.disableAuth || context.authTokens[post.token])
 	{
 
 		//check if all required arguments are present
@@ -175,7 +186,7 @@ function handleRequest(post, request, response)
 		}, context);
 	}
 
-	//else, respond with error code 1 (invalid token)
+	//method exists, but auth token is incorrect
 	else
 	{
 		response.write(JSON.stringify(

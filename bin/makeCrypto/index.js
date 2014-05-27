@@ -1,3 +1,5 @@
+var crypto = require("crypto");
+
 module.exports = function(pass) 
 {
 	//create random salt

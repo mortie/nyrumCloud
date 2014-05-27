@@ -117,3 +117,6 @@ Incorrect POST arguments
 
 **4**:
 Unknonwn error
+
+**5**:
+No such method exists
