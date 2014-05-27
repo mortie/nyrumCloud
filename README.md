@@ -16,14 +16,14 @@ Authenticate.
 Input:
 
 	{
-		"username": (username),
-		"password": (password)
+		"username": (Username),
+		"password": (Password)
 	}
 
 Output if credentials are valid:
 
 	{
-		"token": (auth token)
+		"token": (Auth token.)
 	}
 
 #### **/testToken**:
@@ -33,13 +33,49 @@ Test if token is valid.
 Input:
 
 	{
-		"token": (auth token)
+		"token": (Auth token.)
 	}
 
 Output:
 
 	{
-		"success": (boolean, true if token is valid, false if invalid)
+		"success": (Boolean. True if the token is valid, false if invalid.)
+	}
+
+#### **/makeDir**:
+
+Create directory.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"name": (Name of the directory.),
+		"parent": (ID of the parent directory. Optional.)
+	}
+
+Output:
+
+	{
+		"id": (ID of the newly created directory)
+	}
+
+#### **/listDir**:
+
+Get the contents of a directory.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"dir": (ID of the directory you want to list. Optional. If not provided, it lists the user's root.)
+	}
+
+Output:
+
+	{
+		"dirs": (Array of directory objects. Each directory object has one "name" and one "id" property.),
+		"files": (Array of file objects. Each file object has one "name" and one "id" property.)
 	}
 
 #### **/admin_newUser**:
@@ -49,9 +85,9 @@ Create new user. Requires admin user.
 Input:
 
 	{
-		"token": (auth token),
-		"username": (username),
-		"password": (password)
+		"token": (Auth token.),
+		"username": (Username.),
+		"password": (Password.)
 	}
 
 Output:
@@ -78,3 +114,6 @@ Invalid Username/Password (for /auth)
 
 **3**:
 Incorrect POST arguments
+
+**4**:
+Unknonwn error

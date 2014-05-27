@@ -1,8 +1,6 @@
-var tokenAuth = require("../tokenAuth");
-
 module.exports = function(params, context)
 {
-	if (tokenAuth(params.post, context))
+	if (context.authTokens[params.post.token])
 	{
 		params.response.write(JSON.stringify(
 		{

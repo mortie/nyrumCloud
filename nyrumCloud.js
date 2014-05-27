@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-var http      = require("http");
-var fs        = require("fs");
-var mysql     = require("mysql");
-var crypto    = require("crypto");
+var http       = require("http");
+var fs         = require("fs");
+var mysql      = require("mysql");
+var crypto     = require("crypto");
 
-var methods   = require("./bin/methods");
-var tokenAuth = require("./bin/tokenAuth");
+var methods    = require("./bin/methods");
+var makeCrypto = require("./bin/makeCrypto");
 
 //set up project-wide context variable
 var context =
@@ -64,27 +64,14 @@ function setupSql()
 				console.log("No users. Creating root user...");
 
 				//generate salt and hash
-				try
-				{
-					//create random salt
-					var salt = crypto.randomBytes(64).toString("hex");
-
-					//create hash
-					var hash = crypto.createHash("sha512")
-					          .update(salt+context.conf.root.password)
-					          .digest("hex");
-				}
-				catch (err)
-				{
-					throw err;
-				}
+				var crypto = makeCrypto(context.conf.root.password);
 
 				//create new user
 				var sql = mysql.format("INSERT INTO user (username, passwordHash, passwordSalt, isAdmin) VALUES (?, ?, ?, ?)",
 				[
 					context.conf.root.username,
-					hash,
-					salt,
+					crypto.hash,
+					crypto.salt,
 					true
 				]);
 				context.mysqlConn.query(sql, function(err, result)
@@ -160,7 +147,7 @@ function handleRequest(post, request, response)
 	//if method exists, and authenticated (or method doesn't require authentication),
 	//run the method
 	console.log("running "+url[0]);
-	if (method && (method.disableAuth || tokenAuth(post, context) !== false))
+	if (method && (method.disableAuth || context.authTokens[post.token]))
 	{
 
 		//check if all required arguments are present
