@@ -78,6 +78,42 @@ Output:
 		"files": (Array of file objects. Each file object has one "name" and one "id" property.)
 	}
 
+#### **/uploadFile**:
+
+Upload a file to the server.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"data": (BLOB of the file's content.),
+		"name": (File name.),
+		"parent": (Parent directory of the file. Optional. If not provided, the file will be uploaded to the user's root.)
+	}
+
+Output:
+
+	{
+		"id": (ID of the newly created file.)
+	}
+
+#### **/downloadFile**:
+
+Download a file from the server.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"id": (ID of the file you want.)
+	}
+
+Output:
+
+	{
+		"data": (BLOB of the data you want.)
+	}
+
 #### **/admin_newUser**:
 
 Create new user. Requires admin user.

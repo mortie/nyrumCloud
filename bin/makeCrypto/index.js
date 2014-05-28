@@ -7,7 +7,7 @@ module.exports = function(pass)
 
 	//create hash
 	var hash = crypto.createHash("sha512")
-	           .update(pass)
+	           .update(salt+pass)
 	           .digest("hex");
 
 	return {"salt": salt, "hash": hash};

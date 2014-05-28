@@ -30,6 +30,15 @@ e.listDir.postArgs =
 	//optional: dir
 ]
 
+e.uploadFile = require("./uploadFile.js");
+e.uploadFile.postArgs =
+[
+	"token",
+	"name",
+	"data"
+	//optional: parent
+]
+
 e.admin_newUser = require("./admin_newUser.js");
 [
 	"username",

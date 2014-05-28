@@ -21,8 +21,8 @@ module.exports = function(params, context)
 
 			//generate hash from received password
 			var receivedPassHash = crypto.createHash("sha512")
-			                      .update(user.passwordSalt+params.post.password)
-			                      .digest("hex");
+			                       .update(user.passwordSalt+params.post.password)
+			                       .digest("hex");
 
 			//if correct password
 			if (receivedPassHash === user.passwordHash)
