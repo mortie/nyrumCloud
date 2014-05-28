@@ -35,7 +35,8 @@ e.uploadFile.postArgs =
 [
 	"token",
 	"name",
-	"data"
+	"data",
+	"mimetype"
 	//optional: parent
 ]
 

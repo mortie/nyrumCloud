@@ -38,10 +38,6 @@ function respond(params, context)
 		}));
 		params.response.end();
 	}
-	else
-	{
-		console.log(fileQueryResult, dirQueryResult);
-	}
 }
 
 function createSql(table, userId, parent)

@@ -29,7 +29,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `{db}`.`directory` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
-  `parent_directory_id` INT NULL,
+  `parent_directory_id` INT NULL DEFAULT NULL,
   `owner_user_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_directory_directory1_idx` (`parent_directory_id` ASC),
@@ -52,11 +52,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `{db}`.`file` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `parent_directory_id` INT NOT NULL,
-  `content` LONGBLOB NOT NULL,
-  `mimetype` VARCHAR(45) NOT NULL,
-  `extension` VARCHAR(20) NOT NULL,
-  `title` VARCHAR(256) NOT NULL,
+  `parent_directory_id` INT NULL DEFAULT NULL,
+  `data` LONGBLOB NOT NULL,
+  `mimetype` VARCHAR(255) NOT NULL,
+  `name` VARCHAR(256) NOT NULL,
   `owner_user_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_file_directory_idx` (`parent_directory_id` ASC),

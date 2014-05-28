@@ -176,6 +176,8 @@ function handleRequest(post, request, response)
 			}
 		}
 
+		console.log("running "+url[0]);
+
 		//if all arguments are there, proceed to run the method
 		method(
 		{
