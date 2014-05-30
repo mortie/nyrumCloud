@@ -30,6 +30,13 @@ e.listDir.postArgs =
 	//optional: dir
 ]
 
+e.deleteDir = require("./deleteDir.js");
+e.deleteDir.postArgs =
+[
+	"token",
+	"id"
+]
+
 e.uploadFile = require("./uploadFile.js");
 e.uploadFile.postArgs =
 [
@@ -38,6 +45,20 @@ e.uploadFile.postArgs =
 	"data",
 	"mimetype"
 	//optional: parent
+]
+
+e.downloadFile = require("./downloadFile.js");
+e.downloadFile.postArgs =
+[
+	"token",
+	"id"
+]
+
+e.deleteFile = require("./deleteFile.js");
+e.deleteFile.postArgs =
+[
+	"token",
+	"id"
 ]
 
 e.admin_newUser = require("./admin_newUser.js");

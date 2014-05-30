@@ -78,6 +78,23 @@ Output:
 		"files": (Array of file objects. Each file object has one "name" and one "id" property.)
 	}
 
+#### **/deleteDir**:
+
+Delete a directory. The directory must be empty.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"id": (ID of the directory you want to delete.)
+	}
+
+Output:
+
+	{
+		"success": (Boolean. True if the directory got deleted, false if not.)
+	}
+
 #### **/uploadFile**:
 
 Upload a file to the server.
@@ -88,6 +105,7 @@ Input:
 		"token": (Auth token.),
 		"data": (BLOB of the file's content.),
 		"name": (File name.),
+		"mimetype": (File mime type.),
 		"parent": (Parent directory of the file. Optional. If not provided, the file will be uploaded to the user's root.)
 	}
 
@@ -111,7 +129,26 @@ Input:
 Output:
 
 	{
-		"data": (BLOB of the data you want.)
+		"data": (BLOB of the data you want.),
+		"name": (File name.),
+		"mimetype": (File mime type.)
+	}
+
+#### **/deleteFile**:
+
+Delete a file.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"id": (ID of the file you want to delete.)
+	}
+
+Output:
+
+	{
+		"success": (Boolean. True if the file got deleted, false if not.)
 	}
 
 #### **/admin_newUser**:
