@@ -11,19 +11,18 @@ module.exports = function(params, context)
 	{
 		if (err)
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"err": 4 
-			}));
+			});
 			console.log(err);
 		}
 		else
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"id": result.id
-			}));
+			});
 		}
-		params.response.end();
 	});
 }

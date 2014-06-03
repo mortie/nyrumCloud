@@ -53,7 +53,6 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `{db}`.`file` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `parent_directory_id` INT NULL DEFAULT NULL,
-  `data` LONGBLOB NOT NULL,
   `mimetype` VARCHAR(255) NOT NULL,
   `name` VARCHAR(256) NOT NULL,
   `owner_user_id` INT NOT NULL,

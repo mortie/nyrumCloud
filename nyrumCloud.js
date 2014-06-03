@@ -14,6 +14,10 @@ var context =
 	"authTokens": {}
 }
 
+//create content directory if not exists
+if (!fs.existsSync(context.conf.contentDir))
+	fs.mkdir(context.conf.contentDir);
+
 mysqlConnect();
 
 function mysqlConnect()
@@ -184,7 +188,12 @@ function handleRequest(post, request, response)
 			"url": url,
 			"request": request,
 			"response": response,
-			"post": post
+			"post": post,
+			"respond": function(obj)
+			{
+				this.response.write(JSON.stringify(obj));
+				this.response.end();
+			}
 		}, context);
 	}
 

@@ -21,22 +21,19 @@ module.exports = function(params, context)
 		//if an error occurred, return "unknown error" error code
 		if (err)
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"err": 4
-			}));
+			});
 		}
 
 		//if not, return the ID of the newly created directory
 		else
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"id": result.insertId
-			}));
+			});
 		}
-
-		//whether it's an error or not, close the connection
-		params.response.end();
 	});
 }

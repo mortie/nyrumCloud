@@ -34,12 +34,11 @@ function respond(params, context)
 	if (dirQueryResult !== undefined 
 	&&  fileQueryResult !== undefined)
 	{
-		params.response.write(JSON.stringify(
+		params.respond(
 		{
 			"files": fileQueryResult || [],
 			"directories": dirQueryResult || []
-		}));
-		params.response.end();
+		});
 	}
 }
 

@@ -35,32 +35,29 @@ module.exports = function(params, context)
 				context.authTokens[token] = user.id;
 
 				//respond with the token
-				params.response.write(JSON.stringify(
+				params.respond(
 				{
 					"token": token
-				}));
-				params.response.end();
+				});
 			}
 
 			//if username or password is wrong, respond with error code 2
 			else
 			{
-				params.response.write(JSON.stringify(
+				params.respond(
 				{
 					"err": 2
-				}));
-				params.response.end();
+				});
 			}
 		}
 
 		//if no user exists, respond with error code 2
 		else
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"err": 2
-			}));
-			params.response.end();
+			});
 		}
 	});
 }

@@ -2,17 +2,16 @@ module.exports = function(params, context)
 {
 	if (context.authTokens[params.post.token])
 	{
-		params.response.write(JSON.stringify(
+		params.respond(
 		{
 			"success": true
-		}))
+		});
 	}
 	else
 	{
-		params.response.write(JSON.stringify(
+		params.respond(
 		{
 			"success": false
-		}));
+		});
 	}
-	params.response.end();
 }

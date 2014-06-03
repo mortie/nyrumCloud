@@ -11,5 +11,6 @@
 	},
 	"port": 1337,
 	"maxPostBodyLength": 1000000000,
-	"saltLength": 64
+	"saltLength": 64,
+	"contentDir": "content/"
 }

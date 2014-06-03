@@ -30,18 +30,17 @@ module.exports = function(params, context)
 			context.mysqlConn.query(sql, function(err, result)
 			{
 				if (err) {
-					response.write(JSON.stringify(
+					params.respond(
 					{
 						"success": false
-					}));
-					response.end();
+					});
 				}
 				else
 				{
-					response.write(JSON.stringify(
+					params.respond(
 					{
 						"success": true
-					}));
+					});
 				}
 			});
 		}

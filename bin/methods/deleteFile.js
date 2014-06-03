@@ -11,19 +11,17 @@ module.exports = function(params, context)
 	{
 		if (err)
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"success": false
-			}));
-			params.response.end();
+			});
 		}
 		else
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"success": true
-			}));
-			params.response.end();
+			});
 		}
 	});
 }

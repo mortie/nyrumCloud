@@ -1,8 +1,9 @@
 var mysql = require("mysql");
+var fs = require("fs");
 
 module.exports = function(params, context)
 {
-	var sql = mysql.format("SELECT data, mimetype, name FROM file WHERE id=?",
+	var sql = mysql.format("SELECT data, mimetype, name, id FROM file WHERE id=?",
 	[
 		params.post.id
 	]);
@@ -11,21 +12,22 @@ module.exports = function(params, context)
 	{
 		if (err)
 		{
-			params.response.write(JSON.stringify(
+			params.respond(
 			{
 				"err": 4
-			}));
-			params.response.end();
+			});
 		}
 		else
 		{
-			params.response.write(JSON.stringify(
+			fs.readFile(context.conf.contentDir+result.id, function(err, data)
 			{
-				"name": result.name,
-				"mimetype": result.mimetype,
-				"data": result.data
-			}));
-			params.response.end();
+				params.respond(
+				{
+					"name": result.name,
+					"mimetype": result.mimetype,
+					"data": data 
+				});
+			});
 		}
 	});
 }
