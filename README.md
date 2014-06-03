@@ -68,7 +68,7 @@ Input:
 
 	{
 		"token": (Auth token.),
-		"dir": (ID of the directory you want to list. Optional. If not provided, it lists the user's root.)
+		"id": (ID of the directory you want to list. Optional. If not provided, it lists the user's root.)
 	}
 
 Output:
@@ -93,6 +93,23 @@ Output:
 
 	{
 		"success": (Boolean. True if the directory got deleted, false if not.)
+	}
+
+#### **/getParentDir**:
+
+Get parent of a directory.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"id": (ID of the directory you want to know the parent of.)
+	}
+
+Output:
+
+	{
+		"id": (ID of the parent directory.)
 	}
 
 #### **/uploadFile**:

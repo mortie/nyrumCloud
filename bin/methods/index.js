@@ -37,6 +37,13 @@ e.deleteDir.postArgs =
 	"id"
 ]
 
+e.getParentDir = require("./getParentDir.js");
+e.getParentDir.postArgs =
+[
+	"token",
+	"id"
+]
+
 e.uploadFile = require("./uploadFile.js");
 e.uploadFile.postArgs =
 [

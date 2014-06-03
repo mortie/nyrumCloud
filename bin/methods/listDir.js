@@ -5,11 +5,14 @@ var fileQueryResult;
 
 module.exports = function(params, context)
 {
+	dirQueryResult = undefined;
+	fileQueryResult = undefined;
+
 	var userId = context.authTokens[params.post.token];
 
 	//format queries
-	var dirSql = createSql("directory", userId, params.post.parent);
-	var fileSql = createSql("file", userId, params.post.parent);
+	var dirSql = createSql("directory", userId, params.post.id);
+	var fileSql = createSql("file", userId, params.post.id);
 
 	//execute directory list SQL
 	context.mysqlConn.query(dirSql, function(err, result)
@@ -28,7 +31,7 @@ module.exports = function(params, context)
 
 function respond(params, context)
 {
-	if (dirQueryResult !== undefined
+	if (dirQueryResult !== undefined 
 	&&  fileQueryResult !== undefined)
 	{
 		params.response.write(JSON.stringify(
@@ -40,15 +43,15 @@ function respond(params, context)
 	}
 }
 
-function createSql(table, userId, parent)
+function createSql(table, userId, id)
 {
-	if (parent)
+	if (id)
 	{
 		return mysql.format("SELECT name, id FROM ?? WHERE owner_user_id=? AND parent_directory_id=?",
 		[
 			table,
 			userId,
-			parent
+			id
 		]);
 	}
 	else
