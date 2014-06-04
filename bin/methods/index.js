@@ -54,8 +54,15 @@ e.uploadFile.postArgs =
 	//optional: parent
 ]
 
-e.downloadFile = require("./downloadFile.js");
-e.downloadFile.postArgs =
+e.getFile = require("./getFile.js");
+e.getFile.postArgs =
+[
+	"token",
+	"id"
+]
+
+e.createFileDownload = require("./createFileDownload.js");
+e.createFileDownload.postArgs =
 [
 	"token",
 	"id"

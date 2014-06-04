@@ -132,7 +132,7 @@ Output:
 		"id": (ID of the newly created file.)
 	}
 
-#### **/downloadFile**:
+#### **/getFile**:
 
 Download a file from the server.
 
@@ -150,6 +150,21 @@ Output:
 		"name": (File name.),
 		"mimetype": (File mime type.)
 	}
+
+#### **/createFileDownload**:
+
+Create a file which can be opened by a browser to download a file.
+
+Input:
+
+	{
+		"token": (Auth token.),
+		"id": (ID of the file you want.)
+	}
+
+Output:
+
+	Unlike all other methods, this doesn't reply with a stringified JSON object. Instead, it replies with a website which a browser can open to download the file.
 
 #### **/deleteFile**:
 
