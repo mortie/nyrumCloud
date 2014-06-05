@@ -3,15 +3,37 @@ var fs = require("fs");
 
 module.exports = function(params, context)
 {
-	var sql = mysql.format("SELECT mimetype, name, id FROM file WHERE id=?",
-	[
-		params.post.id
-	]);
+	var token = params.url[1];
+	var id = params.url[2];
 
-	context.mysqlConn.query(sql, function(err, result)
+	if (context.authTokens[token])
 	{
-		var file = result[0];
+		var sql = mysql.format("SELECT mimetype, name, id FROM file WHERE id=?",
+		[
+			id
+		]);
 
+		context.mysqlConn.query(sql, function(err, result)
+		{
+			if (err)
+			{
+				params.respond(
+				{
+					"err": 4
+				});
+			}
+			else
+			{
+				createResponse(params, context, result[0]);
+			}
+		});
+	}
+}
+
+function createResponse(params, context, file)
+{
+	fs.readFile(context.conf.contentDir+file.id, function(err, data)
+	{
 		if (err)
 		{
 			params.respond(
@@ -21,10 +43,10 @@ module.exports = function(params, context)
 		}
 		else
 		{
-			var res = params.response;
-			res.setHeader("Content-disposition", "attachment; filename="+file.name);
-			res.setHeader('Content-type', file.mimetype);
-			fs.createReadStream(context.conf.contentDir+file.id).pipe(res);
+			params.headers["Content-Disposition"] = "attachment; filename="+file.name;
+			params.headers['Content-Type'] = file.mimetype;
+			params.response.write(data);
+			params.respond();
 		}
 	});
 }

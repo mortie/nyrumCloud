@@ -111,39 +111,18 @@ function createServer()
 			}
 		});
 
-		//auth and handle request
 		request.on('end', function()
 		{
-
-			//if POST arguments were provided, go on to handle the request
 			if (postBody)
-			{
-				try
-				{
-					var post = JSON.parse(postBody);
-					handleRequest(post, request, response);
-				}
-				catch (err) {}
-			}
+				var post = JSON.parse(postBody);
 
-			//else, respond with error code 3 (insuficcient arguments)
-			else
-			{
-				response.write(JSON.stringify(
-				{
-					"err": 3
-				}));
-			}
+			handleRequest(post || {}, request, response);
 		});
 	}).listen(context.conf.port);
 }
 
 function handleRequest(post, request, response)
 {
-	var headers = {};
-	headers["Access-Control-Allow-Origin"] = "*";
-	response.writeHead(200, headers);
-
 	var url = request.url.split("/").slice(1);
 	if (url)
 		var method = methods[url[0]];
@@ -189,9 +168,18 @@ function handleRequest(post, request, response)
 			"request": request,
 			"response": response,
 			"post": post,
+			"headers":
+			{
+				"Access-Control-Allow-Origin": "*"
+			},
 			"respond": function(obj)
 			{
-				this.response.write(JSON.stringify(obj));
+				this.response.writeHead(200, this.headers);
+				if (obj)
+				{
+					this.response.write(JSON.stringify(obj));
+				}
+
 				this.response.end();
 			}
 		}, context);

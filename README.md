@@ -153,18 +153,15 @@ Output:
 
 #### **/createFileDownload**:
 
-Create a file which can be opened by a browser to download a file.
+This method is pretty unique. Unlike the other methods, neither the input nor the output is in the JSON format. It's designed to make file downloads easier in web apps.
 
-Input:
+Request a file like this:
 
-	{
-		"token": (Auth token.),
-		"id": (ID of the file you want.)
-	}
+	/createFileDownload/(token)/(id)
 
-Output:
+Where `token` is the authentication token, and `id` is the ID of the file you want.
 
-	Unlike all other methods, this doesn't reply with a stringified JSON object. Instead, it replies with a website which a browser can open to download the file.
+The intended use of this method is to set the window location, or the `src` of an iframe, to `(host):(port)/createFileDonwload/(token)/(id)`. The browser should then proceed to download the file.
 
 #### **/deleteFile**:
 
@@ -225,3 +222,4 @@ Unknonwn error
 
 **5**:
 No such method exists
+

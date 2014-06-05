@@ -62,11 +62,8 @@ e.getFile.postArgs =
 ]
 
 e.createFileDownload = require("./createFileDownload.js");
-e.createFileDownload.postArgs =
-[
-	"token",
-	"id"
-]
+e.createFileDownload.postArgs = [];
+e.createFileDownload.disableAuth = true;
 
 e.deleteFile = require("./deleteFile.js");
 e.deleteFile.postArgs =
