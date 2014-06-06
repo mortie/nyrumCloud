@@ -43,8 +43,19 @@ function createResponse(params, context, file)
 		}
 		else
 		{
+			//file download headers
 			params.headers["Content-Disposition"] = "attachment; filename="+file.name;
-			params.headers['Content-Type'] = file.mimetype;
+			params.headers["Content-Type"] = file.mimetype;
+			params.headers["Content-Transfer-Encoding"] = "binary";
+			params.headers["Accept-Ranges"] = "bytes";
+
+			//prevent caching
+			params.headers["Cache-Control"] = "private";
+			params.headers["Pragma"] = "private";
+			params.headers["Expires"] = "Mon, 26 Jul 1997 05:00:00 GMT";
+
+			console.log("writing data");
+
 			params.response.write(data);
 			params.respond();
 		}
